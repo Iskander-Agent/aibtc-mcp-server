@@ -77,6 +77,10 @@ export function parseArgToClarityValue(arg: unknown): ClarityValue {
           // Strip optional 0x/0X prefix — without this, Buffer.from("0x...", "hex")
           // silently produces an empty buffer (aibtcdev/landing-page#1012 Finding 2)
           const hexStr = (typedArg.value as string).replace(/^0x/i, "");
+          // Buffer.from also stops at the first non-hex character or odd nibble
+          if (!/^([0-9a-f]{2})*$/i.test(hexStr)) {
+            throw new Error(`Invalid hex for buffer argument: "${typedArg.value}"`);
+          }
           return bufferCV(Buffer.from(hexStr, "hex"));
         }
         case "none":
